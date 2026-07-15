@@ -4,6 +4,7 @@
   "description": "",
   "main": "dist/src/index.js",
   "scripts": {
+  "start": "node server.js",
   "build": "echo 'Build completed'"
   }
     "start-server": "node --max-old-space-size=4096 --enable-source-maps dist/src/app.js",
