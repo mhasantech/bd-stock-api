@@ -21,17 +21,23 @@ const expressApp = createExpressServer({
   middlewares: [GlobalErrorHandler],
 });
 
-// Serve frontend
+// Serve frontend (public folder)
 app.use(express.static('public'));
 
 // Use the routing-controllers app as middleware in the express app
 app.use(expressApp);
 
-// Start the Express server (locally)
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
-
-// Vercel-এর জন্য অ্যাপটি এক্সপোর্ট করা (অত্যন্ত গুরুত্বপূর্ণ!)
+// =========================================
+// Vercel-এর জন্য অ্যাপটি এক্সপোর্ট (অবশ্যই শেষ লাইনে থাকতে হবে!)
+// =========================================
 module.exports = app;
+
+// =========================================
+// লোকাল ডেভেলপমেন্টের জন্য সার্ভার স্টার্ট (Vercel-এ এটি ইগনোর হবে)
+// =========================================
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
