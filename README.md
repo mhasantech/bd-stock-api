@@ -47,5 +47,5 @@ This is an unofficial api which crawls data from dsebd. Please report issue if d
 - `CHANGE`: How much the stock has gained or lost compared to the previous day.
 - `TRADE`: Total number of trades for the stock.
 - `VALUE (mn)`: Total monetary value of all trades in millions.
-- `VOLUME`: The total number of shares that were traded..
+- `VOLUME`: The total number of shares that were traded.. 
 
