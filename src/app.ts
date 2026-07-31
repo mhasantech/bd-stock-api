@@ -27,8 +27,11 @@ app.use(express.static('public'));
 // Use the routing-controllers app as middleware in the express app
 app.use(expressApp);
 
-// Start the Express server
+// Start the Express server (locally)
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+// Vercel-এর জন্য অ্যাপটি এক্সপোর্ট করা (অত্যন্ত গুরুত্বপূর্ণ!)
+module.exports = app;
