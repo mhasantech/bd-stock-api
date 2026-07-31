@@ -2,12 +2,14 @@
   "name": "turf-script",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/src/app.js",
-  "start": "node dist/app.js",
-  "start-server": "node --max-old-space-size=4096 --enable-source-maps dist/app.js",
-  "dev": "tsc-watch --noClear --onSuccess 'npm run start-server'",
-  "test": "echo \"Error: no test specified\" && exit 1"
-},
+  "main": "dist/app.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/app.js",
+    "start-server": "node --max-old-space-size=4096 --enable-source-maps dist/app.js",
+    "dev": "tsc-watch --noClear --onSuccess 'npm run start-server'",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
