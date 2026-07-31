@@ -1,14 +1,10 @@
 import axios from "../utils/axiosConfig";
 import { CheerioAPI, load as CheerioLoad } from "cheerio";
-// ==========================================
-// ⚠️ এখানে ইমপোর্ট ঠিক করা হয়েছে (আগে "env" ছিল, এখন "constants" হয়েছে, এবং {} সরানো হয়েছে)
-// ==========================================
+// 🔥 এই ইমপোর্টটি হুবহু নিচের মতো হতে হবে (কোনো {} নেই, এবং ../env নয়, ../constants)
 import DHAKA_STOCK_URLS from "../constants"; 
 import { Service } from "typedi";
 
 interface Quote {
-  // Define the properties of Quote based on your data structure
-  // For example:
   symbol: string;
   ltp: string;
   high: string;
@@ -19,11 +15,9 @@ interface Quote {
   trade: string;
   value: string;
   volume: string;
-  // Add other properties as needed
 }
 
 interface HistData {
-  // Define the properties for historical data
   number: string;
   date: string;
   tradingCode: string;
@@ -91,13 +85,16 @@ export class StockDataService {
 
     return data;
   }
+
   async getStockData(): Promise<any[]> {
+    // ✅ নাম ঠিক করে দেওয়া হয়েছে (LATEST_STOCK)
     const url = DHAKA_STOCK_URLS.LATEST_STOCK;
     const $ = await this.fetchAndParseHtml(url);
     return this.parseTableRows<any>($, "table.table-bordered tr");
   }
 
   async getDsexData(symbol: string | undefined): Promise<any[]> {
+    // ✅ নাম ঠিক করে দেওয়া হয়েছে (DSEX_DATA)
     const url = DHAKA_STOCK_URLS.DSEX_DATA;
 
     try {
@@ -117,6 +114,7 @@ export class StockDataService {
   }
 
   async getTop30(): Promise<any[]> {
+    // ✅ নাম ঠিক করে দেওয়া হয়েছে (TOP_30)
     const url = DHAKA_STOCK_URLS.TOP_30;
 
     try {
@@ -129,11 +127,13 @@ export class StockDataService {
       return [];
     }
   }
+
   async getHistData(
     start: string,
     end: string,
     code = "All Instrument"
   ): Promise<any[]> {
+    // ✅ বানান ও নাম ঠিক করে দেওয়া হয়েছে (HISTORY_DATA)
     const url = DHAKA_STOCK_URLS.HISTORY_DATA;
     const params = {
       startDate: start,
