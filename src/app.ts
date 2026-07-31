@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import "dotenv/config";
 import express from "express";
+import path from "path"; // <-- পাথ মডিউল ইমপোর্ট করা হয়েছে
 import { createExpressServer, useContainer } from "routing-controllers";
 import { Container } from "typedi";
 import { PriceController } from "./controllers/DseController";
@@ -22,18 +23,19 @@ const expressApp = createExpressServer({
 });
 
 // Serve frontend (public folder)
-app.use(express.static('public'));
+// Vercel-এ কাজ করার জন্য এক্সাক্ট পাথ ব্যবহার করা হয়েছে
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Use the routing-controllers app as middleware in the express app
 app.use(expressApp);
 
 // =========================================
-// Vercel-এর জন্য অ্যাপটি এক্সপোর্ট (অবশ্যই শেষ লাইনে থাকতে হবে!)
+// Vercel-এর জন্য অ্যাপটি এক্সপোর্ট
 // =========================================
 module.exports = app;
 
 // =========================================
-// লোকাল ডেভেলপমেন্টের জন্য সার্ভার স্টার্ট (Vercel-এ এটি ইগনোর হবে)
+// লোকাল ডেভেলপমেন্টের জন্য সার্ভার স্টার্ট
 // =========================================
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;
