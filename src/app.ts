@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import "dotenv/config";
 import express from "express";
-import path from "path"; // <-- পাথ মডিউল ইমপোর্ট করা হয়েছে
+import path from "path"; // <-- পাথ মডিউল
 import { createExpressServer, useContainer } from "routing-controllers";
 import { Container } from "typedi";
 import { PriceController } from "./controllers/DseController";
@@ -16,17 +16,17 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+// 🔥 নতুন পরিবর্তন: process.cwd() দিয়ে Vercel-এ এক্সাক্ট রুট পাথ বের করা
+const publicPath = path.join(process.cwd(), 'public');
+app.use(express.static(publicPath));
+
 // Create Express server with routing-controllers
 const expressApp = createExpressServer({
   controllers: [PriceController],
   middlewares: [GlobalErrorHandler],
 });
 
-// Serve frontend (public folder)
-// Vercel-এ কাজ করার জন্য এক্সাক্ট পাথ ব্যবহার করা হয়েছে
-app.use(express.static(path.join(__dirname, '..', 'public')));
-
-// Use the routing-controllers app as middleware in the express app
+// API হ্যান্ডলারটি স্ট্যাটিক এর পরে বসানো হয়েছে, যেন / পাথ public ফোল্ডার থেকে লোড হয়
 app.use(expressApp);
 
 // =========================================
