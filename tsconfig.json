@@ -6,7 +6,7 @@
     "allowJs": true,
     "esModuleInterop": true,
     "noImplicitAny": false,
-    "outDir": "./dist/src",
+        "outDir": "./dist",
     "baseUrl": "./src",
     "paths": {
       "*": ["node_modules/*", "src/types/*"]
