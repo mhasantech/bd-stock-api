@@ -1,6 +1,9 @@
 import axios from "../utils/axiosConfig";
 import { CheerioAPI, load as CheerioLoad } from "cheerio";
-import { DHAKA_STOCK_URLS } from "../env";
+// ==========================================
+// ⚠️ এখানে ইমপোর্ট ঠিক করা হয়েছে (আগে "env" ছিল, এখন "constants" হয়েছে, এবং {} সরানো হয়েছে)
+// ==========================================
+import DHAKA_STOCK_URLS from "../constants"; 
 import { Service } from "typedi";
 
 interface Quote {
@@ -89,13 +92,13 @@ export class StockDataService {
     return data;
   }
   async getStockData(): Promise<any[]> {
-    const url = DHAKA_STOCK_URLS.LATEST_DATA;
+    const url = DHAKA_STOCK_URLS.LATEST_STOCK;
     const $ = await this.fetchAndParseHtml(url);
     return this.parseTableRows<any>($, "table.table-bordered tr");
   }
 
   async getDsexData(symbol: string | undefined): Promise<any[]> {
-    const url = DHAKA_STOCK_URLS.DSEX;
+    const url = DHAKA_STOCK_URLS.DSEX_DATA;
 
     try {
       const $ = await this.fetchAndParseHtml(url);
@@ -131,7 +134,7 @@ export class StockDataService {
     end: string,
     code = "All Instrument"
   ): Promise<any[]> {
-    const url = DHAKA_STOCK_URLS.HISTORIACAL_DATA;
+    const url = DHAKA_STOCK_URLS.HISTORY_DATA;
     const params = {
       startDate: start,
       endDate: end,
