@@ -1,6 +1,6 @@
 import axios from "../utils/axiosConfig";
 import { CheerioAPI, load as CheerioLoad } from "cheerio";
-// 🔥 এই ইমপোর্টটি হুবহু নিচের মতো হতে হবে (কোনো {} নেই, এবং ../env নয়, ../constants)
+// 🔥 এই ইমপোর্টটি হুবহু নিচের মতো হতে হবে (কোনো {} নেই)
 import DHAKA_STOCK_URLS from "../constants"; 
 import { Service } from "typedi";
 
@@ -87,14 +87,12 @@ export class StockDataService {
   }
 
   async getStockData(): Promise<any[]> {
-    // ✅ নাম ঠিক করে দেওয়া হয়েছে (LATEST_STOCK)
     const url = DHAKA_STOCK_URLS.LATEST_STOCK;
     const $ = await this.fetchAndParseHtml(url);
     return this.parseTableRows<any>($, "table.table-bordered tr");
   }
 
   async getDsexData(symbol: string | undefined): Promise<any[]> {
-    // ✅ নাম ঠিক করে দেওয়া হয়েছে (DSEX_DATA)
     const url = DHAKA_STOCK_URLS.DSEX_DATA;
 
     try {
@@ -114,7 +112,6 @@ export class StockDataService {
   }
 
   async getTop30(): Promise<any[]> {
-    // ✅ নাম ঠিক করে দেওয়া হয়েছে (TOP_30)
     const url = DHAKA_STOCK_URLS.TOP_30;
 
     try {
@@ -128,18 +125,18 @@ export class StockDataService {
     }
   }
 
+  // 🌟 ঐতিহাসিক ডেটা ফাংশন (archive: "data" রিমুভ করা হয়েছে)
   async getHistData(
     start: string,
     end: string,
     code = "All Instrument"
   ): Promise<any[]> {
-    // ✅ বানান ও নাম ঠিক করে দেওয়া হয়েছে (HISTORY_DATA)
     const url = DHAKA_STOCK_URLS.HISTORY_DATA;
     const params = {
       startDate: start,
       endDate: end,
       inst: code,
-      archive: "data",
+      // archive: "data", // <-- মুছে ফেলা হয়েছে
     };
     const fullUrl = `${url}?${new URLSearchParams(params).toString()}`;
 
