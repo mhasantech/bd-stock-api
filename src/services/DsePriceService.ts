@@ -3,6 +3,15 @@ import { CheerioAPI, load as CheerioLoad } from "cheerio";
 import DHAKA_STOCK_URLS from "../constants"; 
 import { Service } from "typedi";
 
+// 🔥 DSE এর DD-MM-YYYY ফরম্যাটের সাথে মেলানোর জন্য ফাংশন
+function convertDateFormat(dateStr: string): string {
+    if (!dateStr) return "";
+    const parts = dateStr.split("-"); // YYYY-MM-DD থেকে ভাগ করা
+    if (parts.length !== 3) return dateStr;
+    // DSE এর জন্য DD-MM-YYYY ফরম্যাটে ফিরিয়ে দেওয়া
+    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+}
+
 interface Quote {
   symbol: string;
   ltp: string;
@@ -11,21 +20,6 @@ interface Quote {
   close: string;
   ycp: string;
   change: string;
-  trade: string;
-  value: string;
-  volume: string;
-}
-
-interface HistData {
-  number: string;
-  date: string;
-  tradingCode: string;
-  ltp: string;
-  high: string;
-  low: string;
-  openp: string;
-  closep: string;
-  ycp: string;
   trade: string;
   value: string;
   volume: string;
@@ -124,18 +118,18 @@ export class StockDataService {
     }
   }
 
-  // 🌟 হুবহু ঠিক করা ঐতিহাসিক ডেটা ফাংশন
+  // 🌟 একদম সঠিক DSE Archive ডেটা ফাংশন
   async getHistData(
     start: string,
     end: string,
     code = "All Instrument"
   ): Promise<any[]> {
-    const url = DHAKA_STOCK_URLS.HISTORY_DATA;
+    const url = DHAKA_STOCK_URLS.HISTORY_DATA; // এখন এটি data_archive.php হবে
     
-    // 🔥 DSE 'startdate' ও 'enddate' (ছোট হাতের) গ্রহণ করে
+    // 🔥 startdate এবং enddate কে DD-MM-YYYY ফরম্যাটে রূপান্তর করা হচ্ছে
     const params = {
-      startdate: start, 
-      enddate: end,
+      startdate: convertDateFormat(start), 
+      enddate: convertDateFormat(end),
       inst: code,
     };
 
@@ -143,7 +137,7 @@ export class StockDataService {
 
     const $ = await this.fetchAndParseHtml(fullUrl);
     
-    // 🔥 সিলেক্টর থেকে 'tbody' সরিয়ে দেওয়া হয়েছে (skipFirstRow: true দিয়ে)
+    // DSE এর আর্কাইভ পেজে tbody থাকলে বা না থাকলে উভয় ক্ষেত্রে কাজ করার জন্য
     return this.parseTableRows<any>($, "table.table-bordered tr", true);
   }
 }
