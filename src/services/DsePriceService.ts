@@ -1,6 +1,5 @@
 import axios from "../utils/axiosConfig";
 import { CheerioAPI, load as CheerioLoad } from "cheerio";
-// 🔥 এই ইমপোর্টটি হুবহু নিচের মতো হতে হবে (কোনো {} নেই)
 import DHAKA_STOCK_URLS from "../constants"; 
 import { Service } from "typedi";
 
@@ -125,22 +124,26 @@ export class StockDataService {
     }
   }
 
-  // 🌟 ঐতিহাসিক ডেটা ফাংশন (archive: "data" রিমুভ করা হয়েছে)
+  // 🌟 হুবহু ঠিক করা ঐতিহাসিক ডেটা ফাংশন
   async getHistData(
     start: string,
     end: string,
     code = "All Instrument"
   ): Promise<any[]> {
     const url = DHAKA_STOCK_URLS.HISTORY_DATA;
+    
+    // 🔥 DSE 'startdate' ও 'enddate' (ছোট হাতের) গ্রহণ করে
     const params = {
-      startDate: start,
-      endDate: end,
+      startdate: start, 
+      enddate: end,
       inst: code,
-      // archive: "data", // <-- মুছে ফেলা হয়েছে
     };
+
     const fullUrl = `${url}?${new URLSearchParams(params).toString()}`;
 
     const $ = await this.fetchAndParseHtml(fullUrl);
-    return this.parseTableRows<any>($, "table.table-bordered tbody tr", false);
+    
+    // 🔥 সিলেক্টর থেকে 'tbody' সরিয়ে দেওয়া হয়েছে (skipFirstRow: true দিয়ে)
+    return this.parseTableRows<any>($, "table.table-bordered tr", true);
   }
 }
