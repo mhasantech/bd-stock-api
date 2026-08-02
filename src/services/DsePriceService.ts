@@ -3,26 +3,12 @@ import { CheerioAPI, load as CheerioLoad } from "cheerio";
 import DHAKA_STOCK_URLS from "../constants"; 
 import { Service } from "typedi";
 
-// 🔥 DSE এর DD-MM-YYYY ফরম্যাটের সাথে মেলানোর জন্য ফাংশন
+// YYYY-MM-DD থেকে DD-MM-YYYY ফরম্যাটে পরিবর্তন ফাংশন
 function convertDateFormat(dateStr: string): string {
     if (!dateStr) return "";
-    const parts = dateStr.split("-"); // YYYY-MM-DD থেকে ভাগ করা
+    const parts = dateStr.split("-");
     if (parts.length !== 3) return dateStr;
-    // DSE এর জন্য DD-MM-YYYY ফরম্যাটে ফিরিয়ে দেওয়া
     return `${parts[2]}-${parts[1]}-${parts[0]}`;
-}
-
-interface Quote {
-  symbol: string;
-  ltp: string;
-  high: string;
-  low: string;
-  close: string;
-  ycp: string;
-  change: string;
-  trade: string;
-  value: string;
-  volume: string;
 }
 
 @Service()
@@ -43,37 +29,44 @@ export class StockDataService {
     }
   }
 
-  private getCurrentTradingCodes($: CheerioAPI): string[] {
+  // হেডার বের করার একটি সুরক্ষিত ফাংশন
+  private getCurrentTradingCodes($: CheerioAPI, tableSelector: string): string[] {
     const headers: string[] = [];
-    $("table.table.table-bordered tr")
-      .first()
-      .find("th")
-      .each((_, th) => {
-        headers.push($(th).text().trim());
-      });
+    // ডেটা টেবিলের প্রথম সারি থেকে হেডার (th বা td) বের করা
+    const firstRow = $(tableSelector).first().find("tr").first();
+    firstRow.find("th, td").each((_, el) => {
+        headers.push($(el).text().trim());
+    });
     return headers;
   }
 
   async parseTableRows<T extends Record<string, any>>(
     $: CheerioAPI,
-    selector: string,
+    tableSelector: string,
     skipFirstRow: boolean = true
   ): Promise<T[]> {
-    const headers = this.getCurrentTradingCodes($);
+    const headers = this.getCurrentTradingCodes($, tableSelector);
     const data: T[] = [];
 
-    $(selector).each((index, element) => {
+    // (Advanced) যদি হেডার না পাওয়া যায়, তবে ফাঁকা ডেটা ফেরত দেবে না
+    if (headers.length === 0) return data;
+
+    $(tableSelector).find("tr").each((index, element) => {
+      // প্রথম সারি (হেডার রো) স্কিপ করা
       if (index === 0 && skipFirstRow) return;
 
       const tds = $(element).find("td");
       let rowData: T = {} as T;
-
+      
       headers.forEach((header, idx) => {
-        // @ts-ignore
-        rowData[header] = $(tds[idx]).text().trim().replace(",", "") as any;
+         // @ts-ignore
+         rowData[header] = $(tds[idx]).text().trim().replace(/,/g, "") as any;
       });
-
-      data.push(rowData);
+      
+      // যেকোনো ফাঁকা ডেটা এড়িয়ে যাওয়া
+      if (Object.values(rowData).some(val => val !== "" && val !== undefined)) {
+          data.push(rowData);
+      }
     });
 
     return data;
@@ -82,15 +75,14 @@ export class StockDataService {
   async getStockData(): Promise<any[]> {
     const url = DHAKA_STOCK_URLS.LATEST_STOCK;
     const $ = await this.fetchAndParseHtml(url);
-    return this.parseTableRows<any>($, "table.table-bordered tr");
+    return this.parseTableRows<any>($, "table.table-bordered");
   }
 
   async getDsexData(symbol: string | undefined): Promise<any[]> {
     const url = DHAKA_STOCK_URLS.DSEX_DATA;
-
     try {
       const $ = await this.fetchAndParseHtml(url);
-      let data = await this.parseTableRows<any>($, "table.table-bordered tr");
+      let data = await this.parseTableRows<any>($, "table.table-bordered");
       if (symbol) {
         data = data.filter(
           (d) =>
@@ -106,11 +98,9 @@ export class StockDataService {
 
   async getTop30(): Promise<any[]> {
     const url = DHAKA_STOCK_URLS.TOP_30;
-
     try {
       const $ = await this.fetchAndParseHtml(url);
-      let data = await this.parseTableRows<any>($, "table.table-bordered tr");
-
+      let data = await this.parseTableRows<any>($, "table.table-bordered");
       return data;
     } catch (error) {
       console.error("Error fetching DSEX data:", error);
@@ -118,15 +108,14 @@ export class StockDataService {
     }
   }
 
-  // 🌟 একদম সঠিক DSE Archive ডেটা ফাংশন
+  // 🔥 আপডেট করা আর্কাইভ ডেটা ফাংশন (table.table-bordered টার্গেট করা হয়েছে)
   async getHistData(
     start: string,
     end: string,
     code = "All Instrument"
   ): Promise<any[]> {
-    const url = DHAKA_STOCK_URLS.HISTORY_DATA; // এখন এটি data_archive.php হবে
+    const url = DHAKA_STOCK_URLS.HISTORY_DATA; // data_archive.php
     
-    // 🔥 startdate এবং enddate কে DD-MM-YYYY ফরম্যাটে রূপান্তর করা হচ্ছে
     const params = {
       startdate: convertDateFormat(start), 
       enddate: convertDateFormat(end),
@@ -137,7 +126,7 @@ export class StockDataService {
 
     const $ = await this.fetchAndParseHtml(fullUrl);
     
-    // DSE এর আর্কাইভ পেজে tbody থাকলে বা না থাকলে উভয় ক্ষেত্রে কাজ করার জন্য
-    return this.parseTableRows<any>($, "table.table-bordered tr", true);
+    // 🔑 সঠিক টেবিল সিলেক্টর: table.table-bordered
+    return this.parseTableRows<any>($, "table.table-bordered");
   }
 }
